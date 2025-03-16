@@ -217,10 +217,6 @@ for i in range(4):
 selected_symbols = list(dict.fromkeys(selected_symbols))[:4]
 
 if selected_symbols:
-    # Create dynamic columns based on number of selected symbols
-    num_cols = min(len(selected_symbols), 2)
-    num_rows = (len(selected_symbols) + 1) // 2
-    
     # Fetch and process data for all selected symbols
     data_dict = {}
     for symbol in selected_symbols:
@@ -233,30 +229,28 @@ if selected_symbols:
         if data is not None:
             data_dict[symbol] = calculate_metrics(data)
 
-    # Display metrics in grid
-    for row in range(num_rows):
-        cols = st.columns(num_cols)
-        for col in range(num_cols):
-            idx = row * num_cols + col
-            if idx < len(selected_symbols):
-                symbol = selected_symbols[idx]
-                if symbol in data_dict:
-                    with cols[col]:
-                        st.subheader(symbol)
-                        data = data_dict[symbol]
-                        strength = calculate_strength(data, weights)
-                        st.metric("Current Price", f"${data['close'].iloc[-1]:,.2f}")
-                        st.metric("Strength Score", f"{strength:.2f}")
-                        
-                        # Display metrics
-                        st.write("Technical Indicators")
-                        metrics = {
-                            "RSI": data['RSI'].iloc[-1],
-                            "MACD": data['MACD'].iloc[-1],
-                            "Volatility (%)": data['Volatility'].iloc[-1],
-                            "Volume Momentum": data['Volume_Momentum'].iloc[-1]
-                        }
-                        st.write(metrics)
+    # Create columns for all symbols in one row
+    cols = st.columns(len(selected_symbols))
+    
+    # Display metrics in single row
+    for idx, symbol in enumerate(selected_symbols):
+        if symbol in data_dict:
+            with cols[idx]:
+                st.subheader(symbol)
+                data = data_dict[symbol]
+                strength = calculate_strength(data, weights)
+                st.metric("Current Price", f"${data['close'].iloc[-1]:,.2f}")
+                st.metric("Strength Score", f"{strength:.2f}")
+                
+                # Display metrics
+                st.write("Technical Indicators")
+                metrics = {
+                    "RSI": data['RSI'].iloc[-1],
+                    "MACD": data['MACD'].iloc[-1],
+                    "Volatility (%)": data['Volatility'].iloc[-1],
+                    "Volume Momentum": data['Volume_Momentum'].iloc[-1]
+                }
+                st.write(metrics)
 
     # Create comparison chart
     fig = make_subplots(rows=3, cols=1, 
