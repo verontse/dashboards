@@ -92,8 +92,10 @@ exchange = get_exchange()
 def get_available_symbols():
     try:
         markets = exchange.load_markets()
-        return [market.replace('-', '/') for market in markets.keys() 
-                if market.endswith('-USDT')]
+        # Convert all symbols to dash format to match input
+        symbols = [market.replace('/', '-') for market in markets.keys() 
+                  if market.endswith('USDT')]
+        return sorted(symbols)
     except Exception as e:
         st.error(f"Error fetching symbols: {str(e)}")
         return []
@@ -200,14 +202,15 @@ selected_symbols = []
 # Create 4 symbol input fields
 for i in range(4):
     with cols[i]:
-        symbol = st.text_input(f"Symbol {i+1} (e.g. BTC/USDT)", 
-                             value="BTC/USDT" if i == 0 else "SOL/USDT" if i == 1 else "",
+        symbol = st.text_input(f"Symbol {i+1} (e.g. BTC-USDT)", 
+                             value="BTC-USDT" if i == 0 else "SOL-USDT" if i == 1 else "",
                              key=f"symbol_{i}")
         if symbol:
+            # No need to convert format as we're now using dash format consistently
             if symbol in available_symbols:
                 selected_symbols.append(symbol)
             else:
-                st.error(f"Invalid symbol: {symbol}")
+                st.error(f"Invalid symbol: {symbol}. Please use format: XXX-USDT")
 
 # Remove duplicates and limit to 4
 selected_symbols = list(dict.fromkeys(selected_symbols))[:4]
