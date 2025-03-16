@@ -129,7 +129,6 @@ def fetch_crypto_data(symbol, interval, lookback_days, required_candles):
         st.error(f"Error fetching data for {symbol}: {str(e)}")
         return None
 
-# Rest of your functions remain the same
 def calculate_metrics(df):
     # RSI
     delta = df['close'].diff()
@@ -141,7 +140,9 @@ def calculate_metrics(df):
     # MACD
     exp1 = df['close'].ewm(span=12, adjust=False).mean()
     exp2 = df['close'].ewm(span=26, adjust=False).mean()
+    current_price = df['close'].iloc[-1]
     df['MACD'] = exp1 - exp2
+    df['MACD'] = df['MACD'] / df['close'] * 100
     df['Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
     
     # Normalized Volatility
